@@ -7,6 +7,9 @@ import Prism from "prismjs";
 import "prismjs/components/prism-markup"; // HTML/XML
 import "prismjs/components/prism-css";
 import "prismjs/components/prism-javascript";
+import "prismjs/components/prism-clike";
+import "prismjs/components/prism-markup-templating";
+import "prismjs/components/prism-php";
 import "prismjs/themes/prism-twilight.css"; // A nice dark theme
 
 

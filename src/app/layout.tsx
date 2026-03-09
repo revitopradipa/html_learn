@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HTML untuk Laravel",
-  description: "Pelajari HTML dasar secara interaktif sebagai persiapan untuk Laravel Blade.",
+  title: "Learnspace — Interactive Learning Platform",
+  description: "Platform belajar interaktif untuk calon Web Developer. Kuasai HTML, PHP, dan Laravel secara bertahap.",
 };
 
 export default function RootLayout({

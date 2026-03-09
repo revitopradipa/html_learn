@@ -3,13 +3,16 @@ export type TagContent = {
   description: string;
   attributes: { name: string; description: string }[];
   laravelContext: string;
+  codeExample?: string; // Contoh kode PHP+HTML (untuk topik lanjutan)
 };
 
 export type Topic = {
   id: string;
   title: string;
   tags: TagContent[];
+  isAdvanced?: boolean; // Topik lanjutan dengan layout tutorial
 };
+
 
 export const curriculumData: Topic[] = [
   {
@@ -275,5 +278,153 @@ export const curriculumData: Topic[] = [
         laravelContext: "Di Laravel & Tailwind hal ini sebaiknya DIHINDARI dan kita lebih direkomendasikan pakai framework utility CSS Tailwind. Kecuali jika nilai width / warnanya dinamis dari backend misal: `style=\"width: {{ $progress }}%;\"`"
       }
     ]
+  },
+  {
+    id: "php-in-html",
+    title: "🚀 Lanjutan: PHP di dalam HTML",
+    isAdvanced: true,
+    tags: [
+      {
+        tag: "<?php ?>",
+        description: "Tag pembuka dan penutup PHP. Semua kode PHP harus ditulis di antara tag ini agar dieksekusi oleh server sebelum dikirim ke browser.",
+        attributes: [
+          { name: "<?php", description: "Tag pembuka PHP. Wajib ada untuk memulai blok kode PHP." },
+          { name: "?>", description: "Tag penutup PHP. Bisa dihilangkan di file yang HANYA berisi PHP." }
+        ],
+        laravelContext: "Di Laravel Blade, kamu TIDAK perlu menulis `<?php ?>` secara manual. Blade sudah menyediakan sintaks yang lebih rapi: `{{ }}` untuk echo dan `@directive` untuk kontrol. Namun memahami dasar ini penting agar tahu apa yang terjadi di balik layar.",
+        codeExample: "<!-- file: profil.php -->\n<html>\n<body>\n  <?php\n    $nama = \"Budi\";\n    $umur = 25;\n  ?>\n  <h1>Profil Pengguna</h1>\n  <p>Nama: <?= $nama ?></p>\n  <p>Umur: <?= $umur ?> tahun</p>\n</body>\n</html>"
+      },
+      {
+        tag: "<?= $var ?>",
+        description: "Shorthand (singkatan) dari `<?php echo $var; ?>`. Digunakan untuk langsung mencetak nilai variabel ke dalam HTML. Ini adalah cara paling dasar menampilkan data dinamis.",
+        attributes: [
+          { name: "<?= ?>", description: "Sama dengan <?php echo ?>. Singkat dan sering dipakai di template." }
+        ],
+        laravelContext: "Di Blade, padanan dari `<?= $var ?>` adalah `{{ $var }}`. Bedanya, `{{ }}` otomatis menjalankan `htmlspecialchars()` untuk mencegah serangan XSS — jadi lebih aman! Gunakan `{!! $var !!}` jika memang ingin mencetak HTML mentah.",
+        codeExample: "<!-- PHP biasa -->\n<h1><?= $judul ?></h1>\n<p><?= $deskripsi ?></p>\n\n<!-- Blade (Laravel) — lebih aman & rapi -->\n<h1>{{ $judul }}</h1>\n<p>{{ $deskripsi }}</p>"
+      },
+      {
+        tag: "echo dalam HTML",
+        description: "Perintah `echo` bisa digunakan di dalam blok PHP untuk menghasilkan (generate) tag HTML secara dinamis. Server memproses PHP terlebih dahulu, lalu hasilnya (berupa HTML murni) dikirim ke browser.",
+        attributes: [],
+        laravelContext: "Konsep ini persis yang terjadi di Blade. Ketika kamu menulis `<h1>{{ $title }}</h1>`, Blade mengkompilasinya menjadi `<h1><?php echo e($title); ?></h1>`. Jadi Blade hanyalah 'gula sintaks' di atas PHP biasa.",
+        codeExample: "<?php $warna = \"blue\"; ?>\n<div style=\"color: <?= $warna ?>\">\n  <?php echo \"<strong>Teks ini dibuat oleh PHP!</strong>\"; ?>\n</div>"
+      },
+      {
+        tag: "include & require",
+        description: "Perintah PHP untuk menyisipkan file PHP lain ke dalam file saat ini. `include` memberikan warning jika file tidak ditemukan, sedangkan `require` akan menghentikan eksekusi (fatal error).",
+        attributes: [
+          { name: "include", description: "Menyisipkan file. Jika gagal, hanya warning (program lanjut)." },
+          { name: "require", description: "Menyisipkan file. Jika gagal, fatal error (program berhenti)." },
+          { name: "include_once / require_once", description: "Sama seperti di atas, tapi file hanya di-include satu kali meskipun dipanggil berkali-kali." }
+        ],
+        laravelContext: "Konsep ini adalah dasar dari `@include('partials.header')` dan `@extends('layouts.app')` di Blade. Laravel mengabstraksi `include/require` PHP menjadi directive Blade yang lebih elegan dan terorganisir.",
+        codeExample: "<!-- header.php -->\n<nav>Menu Navigasi</nav>\n\n<!-- index.php -->\n<?php include 'header.php'; ?>\n<main>\n  <h1>Halaman Utama</h1>\n</main>"
+      }
+    ]
+  },
+  {
+    id: "looping-html",
+    title: "🔁 Lanjutan: Looping untuk Generate Elemen HTML",
+    isAdvanced: true,
+    tags: [
+      {
+        tag: "for → <li>",
+        description: "Menggunakan `for` loop PHP untuk menghasilkan elemen <li> secara otomatis. Daripada menulis 10 tag <li> secara manual, cukup tulis satu loop yang mengulangnya. Ini adalah penerapan prinsip DRY (Don't Repeat Yourself).",
+        attributes: [
+          { name: "Pola", description: "`for ($i = 1; $i <= 10; $i++) { echo \"<li>Item ke-$i</li>\"; }`" },
+          { name: "Hasil", description: "Browser menerima 10 buah tag <li> yang sudah di-generate oleh server." }
+        ],
+        laravelContext: "Di Blade: `@for($i = 1; $i <= 10; $i++) <li>Item ke-{{ $i }}</li> @endfor`. Meskipun `@for` tersedia, dalam praktik Laravel lebih sering menggunakan `@foreach` karena data biasanya berasal dari database (array/collection).",
+        codeExample: "<ul>\n<?php for ($i = 1; $i <= 5; $i++) { ?>\n  <li>Item ke-<?= $i ?></li>\n<?php } ?>\n</ul>"
+      },
+      {
+        tag: "foreach → <tr>",
+        description: "Menggunakan `foreach` untuk menampilkan setiap item dari array sebagai baris tabel (<tr>). Ini adalah pola yang PALING SERING digunakan di aplikasi web nyata — menampilkan daftar data dari database ke tabel HTML.",
+        attributes: [
+          { name: "Pola", description: "`foreach ($users as $user) { echo \"<tr><td>{$user['nama']}</td></tr>\"; }`" },
+          { name: "Keunggulan", description: "Jumlah baris tabel otomatis menyesuaikan jumlah data. Tambah data = tambah baris, tanpa ubah kode." }
+        ],
+        laravelContext: "Ini adalah pola UTAMA di Laravel untuk halaman Index/Read pada CRUD: `@foreach($users as $user) <tr><td>{{ $user->name }}</td><td>{{ $user->email }}</td></tr> @endforeach`. Data `$users` biasanya dikirim dari Controller via `User::all()` atau `User::paginate(10)`.",
+        codeExample: "<?php\n$users = [\n  ['nama' => 'Andi', 'email' => 'andi@mail.com'],\n  ['nama' => 'Siti', 'email' => 'siti@mail.com'],\n];\n?>\n<table>\n  <tr><th>Nama</th><th>Email</th></tr>\n  <?php foreach ($users as $user) { ?>\n  <tr>\n    <td><?= $user['nama'] ?></td>\n    <td><?= $user['email'] ?></td>\n  </tr>\n  <?php } ?>\n</table>"
+      },
+      {
+        tag: "foreach → Card UI",
+        description: "Menggunakan loop untuk menghasilkan komponen kartu (card) HTML yang berulang. Sangat umum untuk halaman katalog produk, daftar artikel blog, atau galeri portofolio. Setiap iterasi menghasilkan satu card lengkap dengan gambar, judul, dan deskripsi.",
+        attributes: [
+          { name: "Pola", description: "`foreach ($products as $p) { echo \"<div class='card'><h3>{$p['nama']}</h3><p>Rp {$p['harga']}</p></div>\"; }`" }
+        ],
+        laravelContext: "Di Laravel + Tailwind, pola ini jadi sangat elegan: `@foreach($products as $product) <div class=\"bg-white rounded-lg shadow p-4\"><h3>{{ $product->name }}</h3><p>{{ $product->formatted_price }}</p></div> @endforeach`. Bisa juga dipisahkan ke komponen Blade: `<x-product-card :product=\"$product\" />`.",
+        codeExample: "<?php\n$products = [\n  ['nama' => 'Kaos Laravel', 'harga' => 'Rp 150.000'],\n  ['nama' => 'Stiker PHP', 'harga' => 'Rp 25.000'],\n];\n?>\n<?php foreach ($products as $p) { ?>\n<div class=\"card\">\n  <h3><?= $p['nama'] ?></h3>\n  <p><?= $p['harga'] ?></p>\n</div>\n<?php } ?>"
+      },
+      {
+        tag: "foreach → <option>",
+        description: "Menggunakan loop untuk mengisi dropdown <select> secara dinamis dari array atau data database. Setiap elemen array menjadi satu <option>. Pola ini wajib dikuasai untuk form yang punya relasi (misal: pilih Kategori, pilih Kota).",
+        attributes: [
+          { name: "Pola", description: "`foreach ($kota as $k) { echo \"<option value='$k'>$k</option>\"; }`" },
+          { name: "Selected", description: "Menambahkan logika `selected` untuk menandai opsi yang sebelumnya dipilih user." }
+        ],
+        laravelContext: "Di Blade dengan old() binding: `@foreach($categories as $cat) <option value=\"{{ $cat->id }}\" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option> @endforeach`. Ini memastikan jika form gagal validasi, pilihan user tidak hilang."
+      },
+      {
+        tag: "$loop variable",
+        description: "Variabel khusus di Blade yang memberikan informasi tentang iterasi saat ini di dalam loop: apakah ini iterasi pertama, terakhir, genap, ganjil, atau berapa indeksnya. Sangat berguna untuk styling kondisional.",
+        attributes: [
+          { name: "$loop->index", description: "Indeks iterasi saat ini (mulai dari 0)." },
+          { name: "$loop->iteration", description: "Nomor iterasi saat ini (mulai dari 1)." },
+          { name: "$loop->first / $loop->last", description: "Boolean: apakah iterasi pertama/terakhir." },
+          { name: "$loop->even / $loop->odd", description: "Boolean: apakah iterasi genap/ganjil (untuk zebra-striping tabel)." },
+          { name: "$loop->count", description: "Total jumlah item dalam array." }
+        ],
+        laravelContext: "Contoh zebra-striping tabel: `<tr class=\"{{ $loop->even ? 'bg-gray-50' : 'bg-white' }}\">`. Atau menghilangkan border pada item terakhir: `<div class=\"{{ !$loop->last ? 'border-b' : '' }}\">`. Variable ini HANYA tersedia di Blade `@foreach`."
+      }
+    ]
+  },
+  {
+    id: "dynamic-forms",
+    title: "📝 Lanjutan: Form Dinamis dengan PHP",
+    isAdvanced: true,
+    tags: [
+      {
+        tag: "action dinamis",
+        description: "Atribut `action` pada form bisa diisi secara dinamis menggunakan PHP, sehingga form bisa mengirim data ke URL yang berbeda tergantung konteks (misal: form create vs form edit mengirim ke route yang berbeda).",
+        attributes: [
+          { name: "Create", description: "`<form action=\"/users\" method=\"POST\">` — menyimpan data baru." },
+          { name: "Update", description: "`<form action=\"/users/<?= $id ?>\" method=\"POST\">` — mengupdate data berdasarkan ID." }
+        ],
+        laravelContext: "Di Blade, gunakan helper `route()`: `<form action=\"{{ route('users.store') }}\">` untuk create, dan `<form action=\"{{ route('users.update', $user) }}\">` untuk update. Jangan pernah hardcode URL!",
+        codeExample: "<!-- Form Create (tambah baru) -->\n<form action=\"/users\" method=\"POST\">\n  <input name=\"nama\" placeholder=\"Nama\">\n  <button type=\"submit\">Simpan</button>\n</form>\n\n<!-- Form Edit (ubah data) -->\n<form action=\"/users/<?= $user['id'] ?>\" method=\"POST\">\n  <input name=\"nama\" value=\"<?= $user['nama'] ?>\">\n  <button type=\"submit\">Update</button>\n</form>"
+      },
+      {
+        tag: "value dinamis",
+        description: "Mengisi nilai default input form dari variabel PHP. Penting untuk halaman Edit, di mana form harus menampilkan data yang sudah ada di database agar user bisa mengubahnya.",
+        attributes: [
+          { name: "Pola", description: "`<input name=\"nama\" value=\"<?= $user['nama'] ?>\">` — input terisi data dari database." },
+          { name: "Textarea", description: "`<textarea name=\"bio\"><?= $user['bio'] ?></textarea>` — perhatikan value ada di antara tag, bukan di atribut." }
+        ],
+        laravelContext: "Di Blade, gabungkan dengan `old()` untuk error handling: `value=\"{{ old('nama', $user->nama) }}\"`. Fungsi `old()` akan mengembalikan input sebelumnya jika validasi gagal, atau fallback ke `$user->nama` jika tidak ada old input.",
+        codeExample: "<!-- Halaman Edit: input terisi dari database -->\n<input name=\"nama\" value=\"<?= $user['nama'] ?>\">\n<input name=\"email\" value=\"<?= $user['email'] ?>\">\n<textarea name=\"bio\"><?= $user['bio'] ?></textarea>"
+      },
+      {
+        tag: "Validasi Visual",
+        description: "Menggunakan kondisi PHP (`if`) untuk menampilkan pesan error validasi di bawah input yang bermasalah. Ini memberikan feedback yang jelas kepada user tentang apa yang perlu diperbaiki.",
+        attributes: [
+          { name: "Pola", description: "`if (isset($errors['email'])) { echo \"<span class='text-red-500'>{$errors['email']}</span>\"; }`" }
+        ],
+        laravelContext: "Blade menyediakan directive khusus: `@error('email') <span class=\"text-red-500 text-sm\">{{ $message }}</span> @enderror`. Validasinya sendiri dilakukan di Controller atau Form Request Laravel, bukan di view.",
+        codeExample: "<input name=\"email\" value=\"<?= $old['email'] ?? '' ?>\">\n<?php if (isset($errors['email'])) { ?>\n  <span style=\"color: red;\"><?= $errors['email'] ?></span>\n<?php } ?>"
+      },
+      {
+        tag: "Conditional Rendering",
+        description: "Menampilkan atau menyembunyikan elemen HTML berdasarkan kondisi PHP. Misalnya: tombol Delete hanya muncul untuk admin, badge 'Baru' hanya muncul untuk produk yang dibuat < 7 hari lalu.",
+        attributes: [
+          { name: "Pola", description: "`if ($role === 'admin') { echo '<button>Hapus</button>'; }`" },
+          { name: "Alternatif", description: "Bisa juga pakai ternary: `<?= $stok > 0 ? '<span class=\"text-green-500\">Tersedia</span>' : '<span class=\"text-red-500\">Habis</span>' ?>`" }
+        ],
+        laravelContext: "Di Blade: `@if(auth()->user()->isAdmin()) <button>Hapus</button> @endif`. Atau lebih advanced dengan `@can('delete', $post) ... @endcan` menggunakan sistem authorization Laravel (Policies/Gates).",
+        codeExample: "<?php if ($user['role'] === 'admin') { ?>\n  <button class=\"btn-danger\">Hapus User</button>\n<?php } ?>\n\n<span>\n  <?= $product['stok'] > 0\n    ? '<span style=\"color:green\">Tersedia</span>'\n    : '<span style=\"color:red\">Habis</span>' ?>\n</span>"
+      }
+    ]
   }
 ];
+
